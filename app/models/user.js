@@ -31,6 +31,10 @@ module.exports = function(sequelize, Sequelize) {
       }
     },
 
+    birthdate: {
+      type: Sequelize.DATE
+    },
+
     password: {
       type: Sequelize.STRING,
       allowNull: false
