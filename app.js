@@ -3,8 +3,11 @@ const app = express();
 const cors = require("cors");
 const passport = require("passport");
 const bodyParser = require("body-parser");
+const models = require("./app/models");
 const env = require("dotenv").config();
 const port = process.env.PORT || 3000;
+const registerUserRoute = require("./app/routes/registerUser");
+const loginUserRoute = require("./app/routes/loginUser");
 
 //bodyParser
 app.use(cors());
@@ -14,20 +17,12 @@ app.use(bodyParser.json());
 //passport
 app.use(passport.initialize());
 
-app.get("/", (req, res) => res.send("Hello World!"));
-
-// Models
-const models = require("./app/models");
-
 // Routes
-const registerUserRoute = require("./app/routes/registerUser.js")(
-  app,
-  passport
-);
-const loginUserRoute = require("./app/routes/loginUser")(app, passport);
+registerUserRoute(app, passport);
+loginUserRoute(app, passport);
 
 // load passport strategies
-require("./app/config/passport/passport")(passport, models.user);
+require("./app/config/passport/passport")(passport);
 
 //Sync Databases
 (async () => {

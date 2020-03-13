@@ -1,36 +1,40 @@
-const User = require("../models/user");
+const models = require("../models");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const jwtSecret = require("../config/jwtConfig");
 
-module.exports = function(app, passport) {
-  app.post("/signin", (req, res, next) => {
-    passport.authenticate("local-signin", (err, user, info) => {
-      if (err) {
-        console.log(err);
+module.exports = function(app) {
+  app.post("/signin", async (req, res) => {
+    const username = req.body.username;
+    const password = req.body.password;
+    const User = models.user;
+
+    const user = await User.findOne({
+      where: {
+        username: username
       }
-      if (info != undefined) {
-        console.log(info.message);
-        next();
-      } else {
-        req.logIn(user, err => {
-          if (err) {
-            console.log(err);
-          }
-          User.findOne({
-            where: {
-              username: user.username
-            }
-          })
-            .then(user => {
-              const token = jwt.sign({ id: user.username }, jwtSecret.secret);
-              res.status(200).send({
-                auth: true,
-                token: token,
-                message: "user found & logged in"
-              });
-            })
-            .catch(err => console.log(err));
+    });
+    if (!user) {
+      return res.status(404).send({ error: "Username not found" });
+    }
+
+    bcrypt.compare(password, user.password).then(isMatch => {
+      if (isMatch) {
+        const payload = {
+          id: user.id,
+          name: user.username
+        };
+
+        const token = jwt.sign(payload, jwtSecret.secret);
+
+        res.status(200).send({
+          auth: true,
+          token: token,
+          message: "user found & signed in"
         });
+      } else {
+        return res.status(401).send({ error: "Password incorrect" });
       }
-    })(req, res, next);
+    });
   });
 };
