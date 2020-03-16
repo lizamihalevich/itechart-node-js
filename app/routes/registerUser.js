@@ -1,5 +1,6 @@
 const models = require("../models");
 const bcrypt = require("bcrypt");
+const userRepository = require("../repositories/userRepository");
 
 module.exports = function(app) {
   app.post("/register", async (req, res) => {
@@ -10,11 +11,11 @@ module.exports = function(app) {
       return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
     };
 
-    const user = await User.findOne({
-      where: {
-        email: req.body.email
-      }
+    console.log(userRepository);
+    const user = await userRepository.findUser(req.body.email).catch(err => {
+      console.log(err);
     });
+
     if (user) {
       return res.status(400).send({ error: "Email already exists" });
     } else {
@@ -31,7 +32,7 @@ module.exports = function(app) {
       };
 
       try {
-        await User.create(user);
+        await userRepository.createUser(user);
         console.log("User was added to db!");
         res.status(200).send(user);
       } catch (err) {

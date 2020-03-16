@@ -9,18 +9,16 @@ module.exports = function(passport) {
   };
 
   passport.use(
-    new JwtStrategy(opts, (jwt_payload, done) => {
-      (async () => {
-        try {
-          const user = await User.findOneById(jwt_payload.id);
-          if (user) {
-            return done(null, user);
-          }
-          return done(null, false);
-        } catch (err) {
-          console.log(err);
+    new JwtStrategy(opts, async (jwt_payload, done) => {
+      try {
+        const user = await User.findOneById(jwt_payload.id);
+        if (user) {
+          return done(null, user);
         }
-      })();
+        return done(null, false);
+      } catch (err) {
+        console.log(err);
+      }
     })
   );
 };

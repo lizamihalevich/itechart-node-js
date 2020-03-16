@@ -1,14 +1,16 @@
-const models = require("../models/user");
+const models = require("../models");
 const User = models.user;
 
-exports.createUser = user => {
-  return User.create(user);
-};
+module.exports = {
+  createUser: user => {
+    return User.create(user);
+  },
 
-exports.findUser = ({ username }) => {
-  return User.findOne({
-    where: {
-      username: username
-    }
-  });
+  findUser: username => {
+    return User.findOne({
+      where: {
+        username: username
+      }
+    });
+  }
 };
